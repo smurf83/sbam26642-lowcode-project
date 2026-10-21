@@ -56,3 +56,16 @@ Run `deactivate` when you have finished using the virtual environment.
 - `.gitignore`: Excludes the virtual environment, Python cache files, local
   environment settings and macOS metadata from version control.
 - `README.md`: Describes the project and explains how to set it up and run it.
+
+## Project Idea - What Would I Build If It Took an Evening Instead of a Quarter?
+
+
+If I could build an application in one evening instead of three months, I would develop a Delivery Driver Management App designed to simplify scheduling and daily deliveries.
+
+The application would have two connected components: a Driver Scheduler and a Delivery Driver Helper.
+
+The Scheduler would allow drivers to submit their availability and preferred locations. If a driver couldn't work an assigned shift, they could release it to a queue of available drivers, with the manager approving the replacement.
+
+The Delivery Helper would use AI-powered document scanning to extract customer addresses, Eircodes and phone numbers from delivery dockets. Drivers could open destinations in Google Maps, Apple Maps or Waze, track completed deliveries and automatically calculate paid and outstanding delivery fees.
+
+Using low-code tools and AI-assisted development, I could rapidly create a functional prototype, reduce administrative work and improve efficiency for both drivers and management.
