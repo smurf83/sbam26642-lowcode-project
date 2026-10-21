@@ -58,6 +58,64 @@ def home() -> str:
     return render_template_string(HOME_PAGE)
 
 
+@app.route("/about")
+def about():
+    """Display the Delivery Driver App project vision."""
+    return """
+    <html>
+        <head>
+            <title>About My Project</title>
+        </head>
+        <body>
+            <h1>What Would I Build If It Took an Evening
+            Instead of a Quarter?</h1>
+
+            <h2>Delivery Driver Management App</h2>
+
+            <p>
+            If I could build an application in one evening
+            instead of three months, I would develop a
+            Delivery Driver Management App designed to
+            simplify scheduling and daily deliveries.
+            </p>
+
+            <p>
+            The application would have two connected
+            components: a Driver Scheduler and a
+            Delivery Driver Helper.
+            </p>
+
+            <p>
+            The Scheduler would allow drivers to submit
+            their availability and preferred locations.
+            If a driver couldn't work an assigned shift,
+            they could release it to a queue of available
+            drivers, with the manager approving the
+            replacement.
+            </p>
+
+            <p>
+            The Delivery Helper would use AI-powered
+            document scanning to extract customer addresses,
+            Eircodes and phone numbers from delivery dockets.
+            Drivers could open destinations in Google Maps,
+            Apple Maps or Waze, track completed deliveries
+            and automatically calculate paid and outstanding
+            delivery fees.
+            </p>
+
+            <p>
+            Using low-code tools and AI-assisted development,
+            I could rapidly create a functional prototype,
+            reduce administrative work and improve efficiency
+            for both drivers and management.
+            </p>
+
+            <a href="/">Back to Home</a>
+        </body>
+    </html>
+    """
+
 # Start the local development server only when this file is run directly.
 if __name__ == "__main__":
     app.run()
