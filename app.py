@@ -1,18 +1,14 @@
 """A first AI-assisted Flask application for CCT College Dublin Session 1."""
 
-from flask import Flask, render_template_string
+import re
+
+from flask import Flask, render_template_string, request
 
 # Create the Flask application. __name__ identifies this Python module.
 app = Flask(__name__)
 
-# Keep the HTML here so this beginner project needs only one Python file.
-HOME_PAGE = """
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hello from Suzanne</title>
+# Shared CSS keeps the welcome and contact pages visually consistent.
+PAGE_STYLE = """
     <style>
         body {
             margin: 0;
@@ -38,10 +34,25 @@ HOME_PAGE = """
         p { margin-bottom: 0; }
         .label { font-size: 0.85rem; color: #58647a; margin-bottom: 1rem; }
     </style>
+"""
+
+# Keep the HTML here so this beginner project needs only one Python file.
+HOME_PAGE = """
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello from Suzanne</title>
+""" + PAGE_STYLE + """
 </head>
 <body>
     <main>
         <div class="label">CCT College Dublin · Session 1</div>
+        <nav aria-label="Main navigation">
+            <a href="/">Home</a> · <a href="/about">About</a> ·
+            <a href="/contact">Contact</a>
+        </nav>
         <h1>Hello from Suzanne</h1>
         <p>Welcome to my first AI-assisted Flask project! I am learning to
         build web applications with Python, Flask and a little help from AI.</p>
@@ -111,10 +122,122 @@ def about():
             for both drivers and management.
             </p>
 
-            <a href="/">Back to Home</a>
+            <nav aria-label="Main navigation">
+                <a href="/">Back to Home</a> · <a href="/about">About</a> ·
+                <a href="/contact">Contact</a>
+            </nav>
         </body>
     </html>
     """
+
+# Reuse the homepage styling while keeping all templates in this Python file.
+CONTACT_PAGE = """
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact Suzanne</title>
+""" + PAGE_STYLE + """
+    <style>
+        nav { margin-bottom: 1.5rem; }
+        a { color: #493a9e; }
+        label { display: block; font-weight: 600; margin-top: 1rem; }
+        input, textarea {
+            box-sizing: border-box; width: 100%; padding: 0.7rem;
+            border: 1px solid #58647a; border-radius: 0.4rem; font: inherit;
+        }
+        textarea { resize: vertical; }
+        [aria-invalid="true"] { border: 2px solid #a51d32; }
+        .error { color: #a51d32; margin: 0.25rem 0; }
+        button {
+            margin-top: 1.5rem; padding: 0.7rem 1.4rem; background: #493a9e;
+            color: white; border: 0; border-radius: 0.4rem; font: inherit;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <nav aria-label="Main navigation">
+            <a href="{{ url_for('home') }}">Home</a> ·
+            <a href="{{ url_for('about') }}">About</a> ·
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+        {% if confirmed %}
+            <h1>Thank you, {{ name }}!</h1>
+            <p>Your form passed validation. This demonstration does not save
+            your information or send an email.</p>
+            <p><a href="{{ url_for('home') }}">Back to homepage</a> ·
+            <a href="{{ url_for('contact') }}">Back to contact form</a></p>
+        {% else %}
+            <h1>Contact Suzanne</h1>
+            <p>All fields are required. This is a practice form; information
+            is not saved and no email is sent.</p>
+            {% if errors %}
+                <p class="error" role="alert">Please correct the fields below.</p>
+            {% endif %}
+            <form method="post" action="{{ url_for('contact') }}" novalidate>
+                {% for field, label in [('name', 'Name'), ('email', 'Email'),
+                                         ('message', 'Message')] %}
+                    <label for="{{ field }}">{{ label }}</label>
+                    {% if field == 'message' %}
+                        <textarea id="{{ field }}" name="{{ field }}" rows="5"
+                    {% else %}
+                        <input id="{{ field }}" name="{{ field }}"
+                            type="{{ 'email' if field == 'email' else 'text' }}"
+                            value="{{ values[field] }}"
+                    {% endif %}
+                        required aria-invalid="{{ 'true' if field in errors else 'false' }}"
+                        {% if field in errors %}aria-describedby="{{ field }}-error"{% endif %}
+                    >{% if field == 'message' %}{{ values[field] }}</textarea>{% endif %}
+                    {% if field in errors %}
+                        <p class="error" id="{{ field }}-error">{{ errors[field] }}</p>
+                    {% endif %}
+                {% endfor %}
+                <button type="submit">Submit</button>
+            </form>
+        {% endif %}
+    </main>
+</body>
+</html>
+"""
+
+# A practical format check, rather than a check that the mailbox exists.
+EMAIL_PATTERN = re.compile(
+    r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+"
+    r"(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
+    r"(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+"
+    r"[A-Za-z]{2,63}"
+)
+
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact() -> tuple[str, int]:
+    """Validate a contact form without retaining or sending its contents."""
+    values = {field: "" for field in ("name", "email", "message")}
+    errors = {}
+    if request.method == "POST":
+        # Keep original values for redisplay; strip only for validation/use.
+        values = {field: request.form.get(field, "") for field in values}
+        if not values["name"].strip():
+            errors["name"] = "Please enter your name."
+        email = values["email"].strip()
+        if not EMAIL_PATTERN.fullmatch(email) or len(email) > 254:
+            errors["email"] = "Please enter a valid email address, such as name@example.com."
+        if not values["message"].strip():
+            errors["message"] = "Please enter a message."
+        if not errors:
+            # Jinja automatically escapes user values in render_template_string.
+            return render_template_string(
+                CONTACT_PAGE, confirmed=True, name=values["name"].strip()
+            ), 200
+
+    # 422 indicates that a submitted form contains invalid field values.
+    return render_template_string(
+        CONTACT_PAGE, confirmed=False, values=values, errors=errors
+    ), 422 if errors else 200
+
 
 # Start the local development server only when this file is run directly.
 if __name__ == "__main__":

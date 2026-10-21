@@ -51,11 +51,55 @@ Run `deactivate` when you have finished using the virtual environment.
 
 ## Project files
 
-- `app.py`: Flask application, GET `/` route, HTML and page styling, with comments.
+- `app.py`: Flask application, homepage, about page and contact form, with
+  inline HTML, shared styling and explanatory comments.
 - `requirements.txt`: Pins Flask to version 3.0.3; pip installs its dependencies.
 - `.gitignore`: Excludes the virtual environment, Python cache files, local
   environment settings and macOS metadata from version control.
 - `README.md`: Describes the project and explains how to set it up and run it.
+
+## Contact form
+
+With the server running, visit **http://127.0.0.1:5000/contact**. Navigation links
+connect the homepage, the existing `/about` project vision and the contact form.
+
+The contact route supports GET (show the form) and POST (validate submission).
+Name, email and message are required. Python rejects empty or whitespace-only
+names and messages. Email addresses must have a reasonable format, including
+an `@` and a domain such as `example.com`; this does not verify mailbox existence.
+Surrounding whitespace is ignored when validating.
+
+Invalid submissions return HTTP **422**, display errors next to the relevant
+fields and preserve the original entries. The form uses `novalidate` so you can
+see the server-side validation directly in your browser. User input is rendered
+with Jinja's automatic HTML escaping.
+
+A valid submission returns a confirmation thanking the user by name, with links
+to the homepage and contact form. This is a demonstration: no email is sent and
+no submitted information is saved to a database, file or session. Reloading a
+confirmation may prompt the browser to resubmit the form.
+
+### Manual test checklist
+
+Start the application using the setup and run instructions above, then check:
+
+- [ ] `/` still shows the original welcome heading and message.
+- [ ] `/about` still shows the Delivery Driver Management App project vision.
+- [ ] Navigation links work between all three pages.
+- [ ] GET `/contact` shows an empty form with Name, Email, Message and Submit.
+- [ ] Submit `Suzanne`, `suzanne@example.com` and `Hello!`: the confirmation
+  thanks Suzanne and provides working return links.
+- [ ] Submit `invalid`, `name@` or `name@example` as the email: an email error
+  appears and the other entries remain in the form.
+- [ ] Submit all fields blank: all three fields show errors.
+- [ ] Submit only spaces in each field: all three fields show errors.
+- [ ] Leave just the name or message blank: the correct field shows an error.
+- [ ] Submit `<script>alert(1)</script>` as the name with otherwise valid input:
+  the confirmation displays it as text, without executing it.
+- [ ] In browser developer tools, check Network: invalid POST requests return
+  422, while valid POST requests return 200.
+
+Flask remains pinned to `3.0.3`; the form requires no additional packages.
 
 ## Project Idea - What Would I Build If It Took an Evening Instead of a Quarter?
 
